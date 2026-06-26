@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Magang DPRD Bogor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/typicons/2.1.2/typicons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #080A0E;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+        .root {
+            max-width: 1100px;
+            width: 100%;
+            background: #0F1117;
+            border-radius: 20px;
+            padding: 18px 20px 24px;
+            color: #fff;
+            border: 0.5px solid #232734;
+            position: relative;
+        }
+
+        /* MANAGE BUTTON */
+        .manage-btn {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            background: #252836;
+            border: 0.5px solid #3A3D4A;
+            color: #A0A5B5;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .manage-btn:hover {
+            background: #2F3346;
+            color: #fff;
+            border-color: #5A5D7A;
+        }
+        .manage-btn .typcn {
+            font-size: 16px;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal {
+            background: #1A1D27;
+            border: 0.5px solid #2A2D3A;
+            border-radius: 16px;
+            padding: 28px 32px;
+            max-width: 650px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        .modal h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #F0F1F5;
+            margin-bottom: 4px;
+        }
+        .modal p {
+            font-size: 12px;
+            color: #6B7080;
+            margin-bottom: 18px;
+        }
+        .modal label {
+            font-size: 11px;
+            font-weight: 500;
+            color: #A0A5B5;
+            display: block;
+            margin: 12px 0 4px;
+        }
+        .modal input,
+        .modal textarea,
+        .modal select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 0.5px solid #2A2D3A;
+            background: #0F1117;
+            color: #F0F1F5;
+            font-size: 12px;
+            font-family: 'Inter', sans-serif;
+        }
+        .modal input:focus,
+        .modal textarea:focus {
+            outline: none;
+            border-color: #378ADD;
+        }
+        .modal .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .modal .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .modal .btn-group button {
+            padding: 8px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .modal .btn-save {
+            background: #378ADD;
+            color: #fff;
+        }
+        .modal .btn-save:hover {
+            background: #4A9AEE;
+        }
+        .modal .btn-close {
+            background: transparent;
+            color: #6B7080;
+            border: 0.5px solid #2A2D3A;
+        }
+        .modal .btn-close:hover {
+            background: #252836;
+        }
+        .modal .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #E6E9F2;
+            margin: 16px 0 8px;
+            padding-top: 12px;
+            border-top: 0.5px solid #1E2130;
+        }
+        .modal .section-title:first-of-type {
+            border-top: none;
+            padding-top: 0;
+            margin-top: 0;
+        }
+        .modal .info-hint {
+            font-size: 10px;
+            color: #6B7080;
+            margin-top: 2px;
+            font-style: italic;
+        }
+        .modal .info-hint .typcn {
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        /* TOOLTIP */
+        .info-tip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: help;
+            color: #6B7080;
+            font-size: 11px;
+            border-bottom: 1px dashed #3A3D4A;
+            padding-bottom: 1px;
+        }
+        .info-tip .typcn {
+            font-size: 14px;
+            color: #378ADD;
+        }
+        .info-tip:hover {
+            color: #A0A5B5;
+        }
+
+        /* APP HEADER */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #141822;
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 0.5px solid #262B38;
+        }
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .brand-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #D4AF37;
+            letter-spacing: 0.5px;
+        }
+        .brand-title .highlight {
+            color: #F0F1F5;
+            font-weight: 400;
+        }
+        .brand-sub {
+            font-size: 10px;
+            color: #6B7080;
+            letter-spacing: 0.3px;
+        }
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #1E2818;
+            border: 0.5px solid #2F4A1E;
+            border-radius: 30px;
+            padding: 6px 16px 6px 12px;
+        }
+        .header-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: #75C94A;
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+        }
+        .header-badge span {
+            font-size: 11px;
+            font-weight: 500;
+            color: #B5E08A;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 0.6;
+                transform: scale(0.9);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+            100% {
+                opacity: 0.6;
+                transform: scale(0.9);
+            }
+        }
+
+        /* HERO */
+        .hero {
+            background: #1A1D27;
+            border: 0.5px solid #2A2D3A;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .hero-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #18243A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-icon .typcn {
+            font-size: 22px;
+            color: #378ADD;
+        }
+        .hero-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #F0F1F5;
+        }
+        .hero-sub {
+            font-size: 11px;
+            color: #6B7080;
+            margin-top: 2px;
+        }
+        .status-pill {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #241E0E;
+            border: 0.5px solid #6B4A10;
+            border-radius: 30px;
+            padding: 5px 14px 5px 10px;
+        }
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #EF9F27;
+        }
+        .status-txt {
+            font-size: 11px;
+            font-weight: 500;
+            color: #EF9F27;
+        }
+
+        /* KPI */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .kpi {
+            border-radius: 12px;
+            padding: 12px 14px;
+            position: relative;
+            overflow: hidden;
+            border: 0.5px solid;
+            cursor: default;
+        }
+        .kpi:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+        .kpi-ghost {
+            position: absolute;
+            right: -4px;
+            bottom: -6px;
+            opacity: 0.10;
+            font-size: 48px;
+        }
+        .kpi-lbl {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .kpi-num {
+            font-size: 26px;
+            font-weight: 600;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+        .kpi-sub {
+            font-size: 10px;
+            opacity: 0.75;
+        }
+
+        /* NAV */
+        .nav-wrap {
+            background: #1A1D27;
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 14px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .npill {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 500;
+            border: none;
+            background: transparent;
+            color: #6B7080;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+            min-width: 60px;
+        }
+        .npill .typcn {
+            font-size: 16px;
+        }
+        .npill.on {
+            background: #252836;
+            color: #F0F1F5;
+            border: 0.5px solid #2A2D3A;
+        }
+        .npill:hover:not(.on) {
+            color: #C8CDDD;
+            background: #1F232E;
+        }
+
+        /* PANES */
+        .pane {
+            display: none;
+        }
+        .pane.on {
+            display: block;
+            animation: fade 0.25s ease;
+        }
+        @keyframes fade {
+            0% {
+                opacity: 0.3;
+                transform: translateY(6px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .sec-lbl {
+            font-size: 10px;
+            font-weight: 600;
+            color: #6B7080;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sec-lbl .info-tip {
+            font-size: 10px;
+            text-transform: none;
+            font-weight: 400;
+        }
+
+        /* STEP GRID */
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .scard {
+            border-radius: 12px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all 0.18s;
+            border: 0.5px solid #2A2D3A;
+            background: #1A1D27;
+            position: relative;
+            overflow: hidden;
+        }
+        .scard:hover {
+            border-color: #40445A;
+            background: #202433;
+        }
+        .scard.active {
+            border-color: var(--ac);
+            background: var(--bg);
+        }
+        .scard-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .scard-num {
+            font-size: 10px;
+            color: #6B7080;
+        }
+        .scard-arr {
+            font-size: 12px;
+            color: #6B7080;
+        }
+        .scard-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #E6E9F2;
+            margin-bottom: 2px;
+        }
+        .scard-out {
+            font-size: 10px;
+            color: #6B7080;
+        }
+        .scard-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2.5px;
+        }
+        .row-conn {
+            text-align: center;
+            padding: 6px 0;
+            font-size: 18px;
+            color: #2F3346;
+        }
+
+        /* DRAWER */
+        .drawer {
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-top: 12px;
+            display: none;
+            border: 0.5px solid;
+        }
+        .drawer.on {
+            display: block;
+        }
+        .drawer-head {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .drawer-body {
+            font-size: 11.5px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        /* KLASIFIKASI */
+        .klas-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        .kcard {
+            border-radius: 12px;
+            padding: 14px 8px;
+            text-align: center;
+            border: 0.5px solid #2A2D3A;
+            background: #1A1D27;
+            transition: 0.15s;
+            position: relative;
+        }
+        .kcard:hover {
+            background: #202433;
+            border-color: #3F435A;
+        }
+        .kcard .kcard-info {
+            position: absolute;
+            top: -8px;
+            right: -6px;
+            background: #1A1D27;
+            border-radius: 50%;
+            padding: 2px;
+            font-size: 16px;
+            color: #6B7080;
+            cursor: help;
+            border: 0.5px solid #2A2D3A;
+        }
+        .kcard .kcard-info:hover {
+            color: #378ADD;
+            border-color: #378ADD;
+        }
+        .kcard-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 0.5px solid;
+        }
+        .kcard-name {
+            font-size: 10px;
+            color: #6B7080;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .kcard-ret {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .kcard-pj {
+            font-size: 10px;
+            color: #6B7080;
+        }
+
+        /* COSO */
+        .coso-2col {
+            display: grid;
+            grid-template-columns: 170px 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+        .radar-box {
+            background: #1A1D27;
+            border-radius: 14px;
+            padding: 12px 8px;
+            border: 0.5px solid #2A2D3A;
+        }
+        .score-center {
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .score-big {
+            font-size: 32px;
+            font-weight: 600;
+            color: #378ADD;
+            line-height: 1;
+        }
+        .score-sub {
+            font-size: 10px;
+            color: #6B7080;
+        }
+        .crow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 0;
+            border-bottom: 0.5px solid #1E2130;
+        }
+        .crow:last-child {
+            border: none;
+        }
+        .crow-name {
+            font-size: 11px;
+            color: #A0A5B5;
+            min-width: 130px;
+        }
+        .crow-name .info-tip {
+            font-size: 10px;
+            margin-left: 4px;
+        }
+        .crow-track {
+            flex: 1;
+            height: 5px;
+            background: #1E2130;
+            border-radius: 30px;
+            overflow: hidden;
+        }
+        .crow-fill {
+            height: 100%;
+            border-radius: 30px;
+            width: 0;
+            transition: width 0.9s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+        .crow-score {
+            font-size: 11px;
+            font-weight: 500;
+            min-width: 30px;
+            text-align: right;
+        }
+
+        /* HEAT MAP */
+        .heat-tbl {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 5px;
+            margin-bottom: 14px;
+        }
+        .heat-tbl th {
+            font-size: 10px;
+            color: #6B7080;
+            font-weight: 400;
+            padding: 6px;
+            text-align: center;
+        }
+        .hcell {
+            padding: 12px 6px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .hl {
+            background: #132210;
+            color: #639922;
+        }
+        .hm {
+            background: #261C08;
+            color: #EF9F27;
+        }
+        .hh {
+            background: #250A0A;
+            color: #E24B4A;
+        }
+        .he {
+            background: #E24B4A;
+            color: #fff;
+        }
+
+        /* RISK */
+        .risk-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .rcard {
+            border-radius: 12px;
+            padding: 14px;
+            border: 0.5px solid #2A2D3A;
+            background: #1A1D27;
+            transition: 0.15s;
+        }
+        .rcard:hover {
+            border-color: #3F435A;
+        }
+        .rcard-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .rcard-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #E6E9F2;
+        }
+        .rcard-pills {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .rcard-pill {
+            font-size: 10px;
+            background: #252836;
+            color: #A0A5B5;
+            padding: 2px 10px;
+            border-radius: 30px;
+        }
+        .rcard-mit {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            color: #A0A5B5;
+            background: #252836;
+            border-radius: 8px;
+            padding: 6px 10px;
+        }
+
+        /* BADGE */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 30px;
+            border: 0.5px solid;
+        }
+        .b-red {
+            background: #250A0A;
+            color: #E24B4A;
+            border-color: #4A1515;
+        }
+        .b-amber {
+            background: #261C08;
+            color: #EF9F27;
+            border-color: #4A340A;
+        }
+        .b-blue {
+            background: #0A1A2A;
+            color: #378ADD;
+            border-color: #0C3060;
+        }
+        .b-purple {
+            background: #16133A;
+            color: #7F77DD;
+            border-color: #2A245A;
+        }
+
+        /* ROADMAP */
+        .road-tl {
+            display: flex;
+            flex-direction: column;
+        }
+        .road-item {
+            display: flex;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 0.5px solid #1E2130;
+        }
+        .road-item:last-child {
+            border: none;
+        }
+        .road-spine {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            width: 14px;
+            padding-top: 3px;
+        }
+        .road-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2.5px solid;
+            flex-shrink: 0;
+        }
+        .road-line {
+            width: 1.5px;
+            flex: 1;
+            margin-top: 4px;
+            min-height: 20px;
+            opacity: 0.3;
+        }
+        .road-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #E6E9F2;
+            margin-bottom: 2px;
+        }
+        .road-find {
+            font-size: 11px;
+            color: #6B7080;
+            margin-bottom: 6px;
+        }
+        .road-foot {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .road-time {
+            font-size: 10px;
+            color: #6B7080;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1A2A1A;
+            border: 0.5px solid #2F4A2F;
+            border-radius: 12px;
+            padding: 14px 24px;
+            color: #B5E08A;
+            font-size: 13px;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+        .toast.show {
+            display: flex;
+        }
+        @keyframes slideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .toast .typcn {
+            font-size: 20px;
+            color: #75C94A;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 700px) {
+            .root {
+                padding: 12px;
+            }
+            .kpi-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .klas-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .coso-2col {
+                grid-template-columns: 1fr;
+            }
+            .risk-grid {
+                grid-template-columns: 1fr;
+            }
+            .step-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .modal .row-2 {
+                grid-template-columns: 1fr;
+            }
+            .manage-btn {
+                position: static;
+                margin-bottom: 10px;
+                width: fit-content;
+            }
+            .app-header {
+                flex-wrap: wrap;
+            }
+            .brand-title {
+                font-size: 13px;
+            }
+        }
+        @media (max-width: 480px) {
+            .step-grid {
+                grid-template-columns: 1fr;
+            }
+            .klas-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .hero {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .status-pill {
+                margin-left: 0;
+            }
+            .modal {
+                padding: 20px 16px;
+            }
+            .brand-title {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="root" id="appRoot">
+
+        <!-- MANAGE BUTTON -->
+        <button class="manage-btn" onclick="openModal()">
+            <span class="typcn typcn-cog"></span> Kelola Data
+        </button>
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand-text">
+                <div class="brand-title">
+                    SEKRETARIAT <span class="highlight">|</span> DPRD
+                </div>
+                <div class="brand-sub">Kabupaten Bogor · Evaluasi Pengendalian Internal</div>
+            </div>
+            <div class="header-badge">
+                <span class="dot"></span>
+                <span>Laporan Magang</span>
+            </div>
+        </header>
+
+        <!-- HERO -->
+        <div class="hero">
+            <div class="hero-icon"><span class="typcn typcn-document-text"></span></div>
+            <div>
+                <div class="hero-title">Evaluasi pengendalian internal pengarsipan</div>
+                <div class="hero-sub">Sekretariat DPRD Kabupaten Bogor · Laporan magang</div>
+            </div>
+            <div class="status-pill">
+                <div class="status-dot"></div>
+                <span class="status-txt" id="statusLabel">Cukup memadai</span>
+            </div>
+        </div>
+
+        <!-- KPI -->
+        <div class="kpi-row" id="kpiRow">
+            <div class="kpi" style="background:#0A1626;border-color:#0C2A4A">
+                <div class="kpi-lbl" style="color:#378ADD">Skor COSO</div>
+                <div class="kpi-num" style="color:#85B7EB" id="kpiSkor">3.2<span style="font-size:14px;font-weight:400;color:#378ADD">/5</span></div>
+                <div class="kpi-sub" style="color:#378ADD">Rata-rata 5 komponen</div>
+                <div class="kpi-ghost"><span class="typcn typcn-chart-radar" style="color:#378ADD"></span></div>
+            </div>
+            <div class="kpi" style="background:#1A0A0A;border-color:#3A1515">
+                <div class="kpi-lbl" style="color:#E24B4A">Risiko tinggi</div>
+                <div class="kpi-num" style="color:#F09595" id="kpiRisikoTinggi">2</div>
+                <div class="kpi-sub" style="color:#E24B4A">Tindak segera</div>
+                <div class="kpi-ghost"><span class="typcn typcn-warning" style="color:#E24B4A"></span></div>
+            </div>
+            <div class="kpi" style="background:#1A1208;border-color:#3A2A08">
+                <div class="kpi-lbl" style="color:#EF9F27">Risiko sedang</div>
+                <div class="kpi-num" style="color:#FAC775" id="kpiRisikoSedang">2</div>
+                <div class="kpi-sub" style="color:#EF9F27">Monitor berkala</div>
+                <div class="kpi-ghost"><span class="typcn typcn-info-large" style="color:#EF9F27"></span></div>
+            </div>
+            <div class="kpi" style="background:#0A1608;border-color:#1A3010">
+                <div class="kpi-lbl" style="color:#639922">Quick wins</div>
+                <div class="kpi-num" style="color:#97C459" id="kpiQuickWins">2</div>
+                <div class="kpi-sub" style="color:#639922">Langsung jalan</div>
+                <div class="kpi-ghost"><span class="typcn typcn-rocket" style="color:#639922"></span></div>
+            </div>
+        </div>
+
+        <!-- NAV -->
+        <nav class="nav-wrap">
+            <button class="npill on" data-tab="alur"><span class="typcn typcn-flow-children"></span>Alur arsip</button>
+            <button class="npill" data-tab="klas"><span class="typcn typcn-tags"></span>Klasifikasi</button>
+            <button class="npill" data-tab="coso"><span class="typcn typcn-chart-radar"></span>COSO</button>
+            <button class="npill" data-tab="risiko"><span class="typcn typcn-warning"></span>Risiko</button>
+            <button class="npill" data-tab="road"><span class="typcn typcn-road"></span>Roadmap</button>
+        </nav>
+
+        <!-- PANES -->
+        <div id="pane-alur" class="pane on">
+            <div class="sec-lbl">Alur pengarsipan — klik tahapan untuk detail</div>
+            <div id="flow-root"></div>
+            <div class="drawer" id="drawer">
+                <div class="drawer-head" id="dhead"></div>
+                <div class="drawer-body" id="dbody"></div>
+            </div>
+        </div>
+
+        <div id="pane-klas" class="pane">
+            <div class="sec-lbl">
+                Kode arsip, retensi & penanggung jawab
+                <span class="info-tip" title="Retensi = masa simpan wajib sebelum arsip dimusnahkan. 5 tahun untuk dokumen operasional, 10 tahun untuk dokumen keuangan/pajak.">
+                    <span class="typcn typcn-info"></span> Apa itu retensi?
+                </span>
+            </div>
+            <div class="klas-grid" id="klas-root"></div>
+        </div>
+
+        <div id="pane-coso" class="pane">
+            <div class="sec-lbl">
+                Skor komponen COSO
+                <span class="info-tip" title="Skor 1=Inisial, 2=Berulang, 3=Terdefinisi, 4=Terkelola, 5=Optimal. Skor 3 ke atas berarti sistem sudah berjalan.">
+                    <span class="typcn typcn-info"></span> Apa arti skor?
+                </span>
+            </div>
+            <div class="coso-2col">
+                <div class="radar-box">
+                    <div class="score-center"><div class="score-big" id="cosoAvg">3.2</div><div class="score-sub">dari 5</div></div>
+                    <div style="position:relative;height:170px"><canvas id="radarC"></canvas></div>
+                </div>
+                <div id="coso-root"></div>
+            </div>
+        </div>
+
+        <div id="pane-risiko" class="pane">
+            <div class="sec-lbl">Heat map — probabilitas vs dampak</div>
+            <table class="heat-tbl">
+                <thead><tr><th></th><th>Rendah</th><th>Sedang</th><th>Tinggi</th></tr></thead>
+                <tbody>
+                    <tr><th style="font-size:10px;color:#6B7080;font-weight:400;padding:5px;text-align:right">Rendah</th><td class="hcell hl">Low</td><td class="hcell hl">Low</td><td class="hcell hm">Medium</td></tr>
+                    <tr><th style="font-size:10px;color:#6B7080;font-weight:400;padding:5px;text-align:right">Sedang</th><td class="hcell hl">Low</td><td class="hcell hm">Medium</td><td class="hcell hh">High</td></tr>
+                    <tr><th style="font-size:10px;color:#6B7080;font-weight:400;padding:5px;text-align:right">Tinggi</th><td class="hcell hm">Medium</td><td class="hcell hh">High</td><td class="hcell he">Extreme</td></tr>
+                </tbody>
+            </table>
+            <div class="sec-lbl">Detail risiko teridentifikasi</div>
+            <div class="risk-grid" id="risk-root"></div>
+        </div>
+
+        <div id="pane-road" class="pane">
+            <div class="sec-lbl">Roadmap perbaikan sistem pengarsipan</div>
+            <div style="position:relative;width:100%;height:180px;margin-bottom:12px">
+                <canvas id="ganttC"></canvas>
+            </div>
+            <div class="road-tl" id="road-root"></div>
+        </div>
+
+    </div>
+
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2>⚙️ Kelola Data Dashboard</h2>
+            <p>Edit data di bawah, lalu klik Simpan. Dashboard akan otomatis refresh.</p>
+
+            <!-- COSO -->
+            <div class="section-title">
+                📊 Skor COSO (1-5)
+                <div class="info-hint">
+                    <span class="typcn typcn-info"></span> 1=Inisial, 2=Berulang, 3=Terdefinisi, 4=Terkelola, 5=Optimal
+                </div>
+            </div>
+            <div class="row-2">
+                <div class="input-group">
+                    <label>Lingkungan Pengendalian</label>
+                    <input type="number" id="inputLP" min="1" max="5" step="0.5" value="4">
+                </div>
+                <div class="input-group">
+                    <label>Penilaian Risiko</label>
+                    <input type="number" id="inputPR" min="1" max="5" step="0.5" value="3">
+                </div>
+                <div class="input-group">
+                    <label>Aktivitas Pengendalian</label>
+                    <input type="number" id="inputAK" min="1" max="5" step="0.5" value="3">
+                </div>
+                <div class="input-group">
+                    <label>Informasi & Komunikasi</label>
+                    <input type="number" id="inputIK" min="1" max="5" step="0.5" value="3">
+                </div>
+                <div class="input-group">
+                    <label>Monitoring</label>
+                    <input type="number" id="inputMO" min="1" max="5" step="0.5" value="3">
+                </div>
+                <div class="input-group">
+                    <label>Status Kesimpulan</label>
+                    <input type="text" id="inputStatus" value="Cukup memadai" placeholder="Contoh: Memadai, Kurang">
+                </div>
+            </div>
+
+            <!-- RISIKO -->
+            <div class="section-title">⚠️ Risiko (pisahkan dengan koma, maks 4)</div>
+            <div class="input-group">
+                <label>Nama Risiko</label>
+                <input type="text" id="inputRisikoNama" value="Dokumen hilang, Salah penempatan, Kerusakan fisik, Akses tidak sah">
+            </div>
+            <div class="row-2">
+                <div class="input-group">
+                    <label>Probabilitas (Rendah/Sedang/Tinggi)</label>
+                    <input type="text" id="inputRisikoProb" value="Sedang, Tinggi, Sedang, Rendah">
+                </div>
+                <div class="input-group">
+                    <label>Dampak (Rendah/Sedang/Tinggi)</label>
+                    <input type="text" id="inputRisikoDampak" value="Tinggi, Sedang, Sedang, Tinggi">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Mitigasi (pisahkan dengan koma)</label>
+                <input type="text" id="inputRisikoMit" value="Digitalisasi & log arsip, Standarisasi kode arsip, Backup digital, Pembatasan akses">
+            </div>
+
+            <!-- QUICK WINS -->
+            <div class="section-title">🚀 Rekomendasi Perbaikan</div>
+            <div class="input-group">
+                <label>Rekomendasi (pisahkan dengan koma, maks 4)</label>
+                <input type="text" id="inputQuickWins" value="Buat kode arsip baku, Checklist arsip bulanan, Database arsip Excel, Implementasi e-arsip">
+            </div>
+            <div class="row-2">
+                <div class="input-group">
+                    <label>Temuan (pisahkan dengan koma)</label>
+                    <input type="text" id="inputQuickFind" value="Tidak ada kode standar, Monitoring lemah, Pencarian manual lambat, Digitalisasi belum penuh">
+                </div>
+                <div class="input-group">
+                    <label>Waktu (pisahkan dengan koma)</label>
+                    <input type="text" id="inputQuickWaktu" value="0–3 bulan, 0–3 bulan, 3–6 bulan, 6–12 bulan">
+                </div>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="btn-group">
+                <button class="btn-close" onclick="closeModal()">Tutup</button>
+                <button class="btn-save" onclick="saveData()">💾 Simpan & Refresh</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+        <span class="typcn typcn-check"></span>
+        <span id="toastMsg">Data berhasil diperbarui!</span>
+    </div>
+
+    <script>
+        // ============================================================
+        //  DEFAULT DATA
+        // ============================================================
+        let DB = {
+            coso: [
+                { name: 'Lingkungan pengendalian', skor: 4 },
+                { name: 'Penilaian risiko', skor: 3 },
+                { name: 'Aktivitas pengendalian', skor: 3 },
+                { name: 'Informasi & komunikasi', skor: 3 },
+                { name: 'Monitoring', skor: 3 }
+            ],
+            risiko: [
+                { name: 'Dokumen hilang', prob: 'Sedang', dampak: 'Tinggi', mit: 'Digitalisasi & log arsip' },
+                { name: 'Salah penempatan', prob: 'Tinggi', dampak: 'Sedang', mit: 'Standarisasi kode arsip' },
+                { name: 'Kerusakan fisik', prob: 'Sedang', dampak: 'Sedang', mit: 'Backup digital' },
+                { name: 'Akses tidak sah', prob: 'Rendah', dampak: 'Tinggi', mit: 'Pembatasan akses' }
+            ],
+            quickWins: [
+                { rekom: 'Buat kode arsip baku', find: 'Tidak ada kode standar', waktu: '0–3 bulan', pri: 'Quick Win',
+                    bc: 'b-blue', lc: '#378ADD' },
+                { rekom: 'Checklist arsip bulanan', find: 'Monitoring lemah', waktu: '0–3 bulan', pri: 'Quick Win',
+                    bc: 'b-blue', lc: '#378ADD' },
+                { rekom: 'Database arsip Excel', find: 'Pencarian manual lambat', waktu: '3–6 bulan', pri: 'Medium',
+                    bc: 'b-amber', lc: '#EF9F27' },
+                { rekom: 'Implementasi e-arsip', find: 'Digitalisasi belum penuh', waktu: '6–12 bulan', pri: 'Long term',
+                    bc: 'b-purple', lc: '#7F77DD' }
+            ],
+            status: 'Cukup memadai'
+        };
+
+        // ============================================================
+        //  RENDER ENGINE
+        // ============================================================
+        let radarChart = null;
+        let ganttChart = null;
+
+        function renderAll() {
+            renderAlur();
+            renderKlasifikasi();
+            renderCoso();
+            renderRisiko();
+            renderRoadmap();
+            renderKPI();
+            renderStatus();
+            renderCharts();
+        }
+
+        function renderAlur() {
+            const fr = document.getElementById('flow-root');
+            const steps = [
+                { name: 'Penerimaan', out: 'Dokumen masuk', color: '#378ADD', bg: '#0A1626', bc: '#0C2A4A',
+                    detail: 'Dokumen diterima dari subbagian terkait.' },
+                { name: 'Pemeriksaan', out: 'Dokumen valid', color: '#7F77DD', bg: '#13103A', bc: '#1E1A4A',
+                    detail: 'Kelengkapan administrasi dan tanda tangan diperiksa.' },
+                { name: 'Verifikasi', out: 'Dok. terverifikasi', color: '#7F77DD', bg: '#13103A', bc: '#1E1A4A',
+                    detail: 'Verifikasi administratif keabsahan dokumen.' },
+                { name: 'Pencatatan', out: 'Nomor arsip', color: '#1D9E75', bg: '#0A1E16', bc: '#0A2A1E',
+                    detail: 'Dokumen diinput ke register dan diberi nomor unik.' },
+                { name: 'Klasifikasi', out: 'Kode arsip', color: '#1D9E75', bg: '#0A1E16', bc: '#0A2A1E',
+                    detail: 'Pengelompokan per jenis dan tahun sesuai kode.' },
+                { name: 'Penyimpanan', out: 'Arsip tersimpan', color: '#1D9E75', bg: '#0A1E16', bc: '#0A2A1E',
+                    detail: 'Dokumen disimpan di ordner atau lemari arsip.' },
+                { name: 'Monitoring', out: 'Lap. monitoring', color: '#EF9F27', bg: '#1A1208', bc: '#3A2A08',
+                    detail: 'Kontrol keberadaan arsip secara berkala.' },
+                { name: 'Peminjaman', out: 'Log peminjaman', color: '#EF9F27', bg: '#1A1208', bc: '#3A2A08',
+                    detail: 'Setiap peminjaman dicatat identitas & tanggal.' },
+                { name: 'Pengembalian', out: 'Arsip lengkap', color: '#639922', bg: '#0A1608', bc: '#1A3010',
+                    detail: 'Verifikasi pengembalian ke lokasi semula.' }
+            ];
+            fr.innerHTML = '';
+            let activeS = null;
+            [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8]
+            ].forEach((row, ri) => {
+                const rEl = document.createElement('div');
+                rEl.className = 'step-grid';
+                rEl.style.marginBottom = '0';
+                row.forEach((idx, ci) => {
+                    const s = steps[idx];
+                    const el = document.createElement('div');
+                    el.className = 'scard';
+                    el.style.setProperty('--ac', s.color);
+                    el.style.setProperty('--bg', s.bg);
+                    el.innerHTML =
+                        `<div class="scard-top"><span class="scard-num">${idx+1}</span>${ci<2?`<span class="scard-arr" style="color:${s.color}">→</span>`:''}</div><div class="scard-name">${s.name}</div><div class="scard-out">${s.out}</div><div class="scard-bar" style="background:${s.color}"></div>`;
+                    el.onclick = () => {
+                        const dr = document.getElementById('drawer');
+                        if (activeS === idx) {
+                            document.querySelectorAll('.scard').forEach(e => { e.classList.remove('active');
+                                e.style.background = '#1A1D27' });
+                            dr.classList.remove('on');
+                            activeS = null;
+                            return;
+                        }
+                        document.querySelectorAll('.scard').forEach(e => { e.classList.remove('active');
+                            e.style.background = '#1A1D27' });
+                        el.classList.add('active');
+                        el.style.background = s.bg;
+                        activeS = idx;
+                        document.getElementById('dhead').textContent = `${idx+1}. ${s.name}`;
+                        document.getElementById('dhead').style.color = s.color;
+                        document.getElementById('dbody').textContent = s.detail;
+                        document.getElementById('dbody').style.color = s.color + 'BB';
+                        dr.style.cssText = `border-color:${s.bc};background:${s.bg};display:block`;
+                    };
+                    rEl.appendChild(el);
+                });
+                fr.appendChild(rEl);
+                if (ri < 2) {
+                    const a = document.createElement('div');
+                    a.className = 'row-conn';
+                    a.textContent = '↓';
+                    fr.appendChild(a);
+                }
+            });
+        }
+
+        function renderKlasifikasi() {
+            const kr = document.getElementById('klas-root');
+            const data = [
+                { kode: 'SPPD', name: 'Surat Perintah Perjalanan Dinas', ret: '5 Thn', pj: 'Staf Keuangan',
+                    color: '#378ADD', bg: '#0A1626', bc: '#0C2A4A', info: 'Dokumen perjalanan dinas, retensi 5 tahun sesuai masa audit operasional' },
+                { kode: 'SPJ', name: 'Surat Pertanggungjawaban', ret: '5 Thn', pj: 'Bendahara', color: '#7F77DD',
+                    bg: '#13103A', bc: '#1E1A4A', info: 'Pertanggungjawaban keuangan, retensi 5 tahun' },
+                { kode: 'BP', name: 'Bukti Pajak', ret: '10 Thn', pj: 'Bendahara', color: '#1D9E75', bg: '#0A1E16',
+                    bc: '#0A2A1E', info: 'Wajib simpan 10 tahun sesuai UU KUP (ketentuan perpajakan)' },
+                { kode: 'LRA', name: 'Laporan Realisasi Anggaran', ret: '10 Thn', pj: 'Kasubbag', color: '#EF9F27',
+                    bg: '#1A1208', bc: '#3A2A08', info: 'Laporan keuangan tahunan, acuan audit BPK' },
+                { kode: 'CALK', name: 'Catatan atas Laporan Keuangan', ret: '10 Thn', pj: 'Kasubbag', color: '#639922',
+                    bg: '#0A1608', bc: '#1A3010', info: 'Penjelasan detail laporan keuangan, penting untuk audit jangka panjang' }
+            ];
+            kr.innerHTML = '';
+            data.forEach(k => {
+                const d = document.createElement('div');
+                d.className = 'kcard';
+                d.innerHTML = `
+                    <span class="kcard-info typcn typcn-info" title="${k.info}"></span>
+                    <div class="kcard-circle" style="background:${k.bg};border-color:${k.bc};color:${k.color}">${k.kode}</div>
+                    <div class="kcard-name">${k.name}</div>
+                    <div class="kcard-ret" style="color:${k.color}">${k.ret}</div>
+                    <div class="kcard-pj">${k.pj}</div>
+                `;
+                kr.appendChild(d);
+            });
+        }
+
+        function renderCoso() {
+            const root = document.getElementById('coso-root');
+            root.innerHTML = '';
+            const colors = ['#639922', '#EF9F27', '#EF9F27', '#EF9F27', '#EF9F27'];
+            const notes = [
+                'Struktur jelas',
+                'Belum terdokumentasi',
+                'Monitoring perlu naik',
+                'Belum digital',
+                'Belum berkala'
+            ];
+            const tips = [
+                'Skor 4 = struktur organisasi dan budaya pengendalian sudah jelas dan berjalan',
+                'Skor 3 = penilaian risiko sudah ada tapi belum terdokumentasi dengan baik',
+                'Skor 3 = prosedur ada tapi monitoring masih kurang optimal',
+                'Skor 3 = informasi masih manual, belum terdigitalisasi',
+                'Skor 3 = monitoring belum dilakukan secara berkala'
+            ];
+            DB.coso.forEach((c, i) => {
+                const d = document.createElement('div');
+                d.className = 'crow';
+                const pct = (c.skor / 5) * 100;
+                d.innerHTML =
+                    `<div class="crow-name">${c.name} <span class="info-tip" title="${tips[i]}"><span class="typcn typcn-info"></span></span></div><div class="crow-track"><div class="crow-fill" style="background:${colors[i]}" data-p="${pct}"></div></div><div class="crow-score" style="color:${colors[i]}">${c.skor}/5</div>`;
+                root.appendChild(d);
+            });
+            setTimeout(() => {
+                document.querySelectorAll('#coso-root .crow-fill').forEach(el => {
+                    el.style.width = el.dataset.p + '%';
+                });
+            }, 200);
+            const avg = DB.coso.reduce((s, c) => s + c.skor, 0) / DB.coso.length;
+            document.getElementById('cosoAvg').textContent = avg.toFixed(1);
+        }
+
+        function renderRisiko() {
+            const rr = document.getElementById('risk-root');
+            rr.innerHTML = '';
+            const levels = DB.risiko.map(r => {
+                const p = r.prob.toLowerCase(),
+                    d = r.dampak.toLowerCase();
+                if ((p === 'tinggi' && d === 'tinggi')) return 'Extreme';
+                if ((p === 'tinggi' && d === 'sedang') || (p === 'sedang' && d === 'tinggi')) return 'Tinggi';
+                if ((p === 'sedang' && d === 'sedang') || (p === 'tinggi' && d === 'rendah') || (p === 'rendah' && d ===
+                    'tinggi')) return 'Sedang';
+                return 'Rendah';
+            });
+            DB.risiko.forEach((r, i) => {
+                const d = document.createElement('div');
+                d.className = 'rcard';
+                const level = levels[i];
+                const bc = level === 'Tinggi' || level === 'Extreme' ? 'b-red' : level === 'Sedang' ? 'b-amber' :
+                    'b-blue';
+                d.innerHTML =
+                    `<div class="rcard-head"><div class="rcard-name">${r.name}</div><span class="badge ${bc}">${level}</span></div><div class="rcard-pills"><span class="rcard-pill">Prob: ${r.prob}</span><span class="rcard-pill">Dampak: ${r.dampak}</span></div><div class="rcard-mit"><span class="typcn typcn-shield" style="font-size:14px"></span>${r.mit}</div>`;
+                rr.appendChild(d);
+            });
+        }
+
+        function renderRoadmap() {
+            const root = document.getElementById('road-root');
+            root.innerHTML = '';
+            DB.quickWins.forEach((r, i) => {
+                const isLast = i === DB.quickWins.length - 1;
+                const d = document.createElement('div');
+                d.className = 'road-item';
+                d.innerHTML =
+                    `<div class="road-spine"><div class="road-dot" style="border-color:${r.lc}"></div>${!isLast?`<div class="road-line" style="background:${r.lc}"></div>`:''}</div><div style="flex:1"><div class="road-title">${r.rekom}</div><div class="road-find">Temuan: ${r.find}</div><div class="road-foot"><span class="badge ${r.bc}">${r.pri}</span><span class="road-time"><span class="typcn typcn-clock" style="font-size:12px"></span>${r.waktu}</span></div></div>`;
+                root.appendChild(d);
+            });
+        }
+
+        function renderKPI() {
+            const tinggi = DB.risiko.filter(r => {
+                const p = r.prob.toLowerCase(),
+                    d = r.dampak.toLowerCase();
+                return (p === 'tinggi' && d === 'sedang') || (p === 'sedang' && d === 'tinggi') || (p === 'tinggi' &&
+                    d === 'tinggi');
+            }).length;
+            const sedang = DB.risiko.filter(r => {
+                const p = r.prob.toLowerCase(),
+                    d = r.dampak.toLowerCase();
+                return (p === 'sedang' && d === 'sedang') || (p === 'tinggi' && d === 'rendah') || (p === 'rendah' &&
+                    d === 'tinggi');
+            }).length;
+            const quick = DB.quickWins.filter(r => r.pri === 'Quick Win').length;
+            document.getElementById('kpiRisikoTinggi').textContent = tinggi;
+            document.getElementById('kpiRisikoSedang').textContent = sedang;
+            document.getElementById('kpiQuickWins').textContent = quick;
+            const avg = DB.coso.reduce((s, c) => s + c.skor, 0) / DB.coso.length;
+            document.getElementById('kpiSkor').innerHTML = avg.toFixed(1) +
+                `<span style="font-size:14px;font-weight:400;color:#378ADD">/5</span>`;
+        }
+
+        function renderStatus() {
+            document.getElementById('statusLabel').textContent = DB.status || 'Cukup memadai';
+        }
+
+        function renderCharts() {
+            const data = DB.coso.map(c => c.skor);
+            const ctx = document.getElementById('radarC');
+            if (radarChart) radarChart.destroy();
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['LP', 'PR', 'AK', 'IK', 'MO'],
+                    datasets: [{ data: data, backgroundColor: 'rgba(55,138,221,0.18)', borderColor: '#378ADD',
+                            pointBackgroundColor: '#378ADD', pointBorderColor: '#0F1117', pointRadius: 4,
+                            borderWidth: 1.5 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 5,
+                            ticks: { stepSize: 1, font: { size: 8 }, backdropColor: 'transparent',
+                            color: '#6B7080' },
+                            pointLabels: { font: { size: 9 }, color: '#A0A5B5' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            angleLines: { color: 'rgba(255,255,255,0.06)' }
+                        }
+                    }
+                }
+            });
+
+            const gctx = document.getElementById('ganttC');
+            if (ganttChart) ganttChart.destroy();
+            const labels = DB.quickWins.map(r => r.rekom);
+            const durations = DB.quickWins.map(r => {
+                const w = r.waktu;
+                if (w.includes('0–3')) return 3;
+                if (w.includes('3–6')) return 3;
+                if (w.includes('6–12')) return 6;
+                return 3;
+            });
+            const colors = DB.quickWins.map(r => {
+                if (r.pri === 'Quick Win') return ['#0C2A4A', '#378ADD'];
+                if (r.pri === 'Medium') return ['#3A2A08', '#EF9F27'];
+                return ['#16133A', '#7F77DD'];
+            });
+            const starts = [0, 0, 3, 6];
+            ganttChart = new Chart(gctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { data: starts, backgroundColor: 'transparent', borderColor: 'transparent' },
+                        { data: durations, backgroundColor: colors.map(c => c[0]), borderColor: colors.map(c => c[
+                                1]), borderWidth: 1, borderRadius: 5, borderSkipped: false }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ctx
+                                .datasetIndex === 1 ? `Durasi: ${ctx.raw} bln` : '' } } },
+                    scales: {
+                        x: { stacked: true, max: 12, ticks: { callback: v => 'Bln ' + v, font: { size: 9 },
+                                color: '#6B7080' }, grid: { color: 'rgba(255,255,255,0.05)' },
+                            border: { dash: [3, 3], color: '#2A2D3A' } },
+                        y: { stacked: true, ticks: { font: { size: 10 }, color: '#A0A5B5' },
+                        grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // ============================================================
+        //  MODAL
+        // ============================================================
+        function openModal() {
+            document.getElementById('inputLP').value = DB.coso[0].skor;
+            document.getElementById('inputPR').value = DB.coso[1].skor;
+            document.getElementById('inputAK').value = DB.coso[2].skor;
+            document.getElementById('inputIK').value = DB.coso[3].skor;
+            document.getElementById('inputMO').value = DB.coso[4].skor;
+            document.getElementById('inputStatus').value = DB.status || 'Cukup memadai';
+
+            document.getElementById('inputRisikoNama').value = DB.risiko.map(r => r.name).join(', ');
+            document.getElementById('inputRisikoProb').value = DB.risiko.map(r => r.prob).join(', ');
+            document.getElementById('inputRisikoDampak').value = DB.risiko.map(r => r.dampak).join(', ');
+            document.getElementById('inputRisikoMit').value = DB.risiko.map(r => r.mit).join(', ');
+
+            document.getElementById('inputQuickWins').value = DB.quickWins.map(r => r.rekom).join(', ');
+            document.getElementById('inputQuickFind').value = DB.quickWins.map(r => r.find).join(', ');
+            document.getElementById('inputQuickWaktu').value = DB.quickWins.map(r => r.waktu).join(', ');
+
+            document.getElementById('modalOverlay').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('open');
+        }
+
+        function saveData() {
+            const lp = parseFloat(document.getElementById('inputLP').value) || 3;
+            const pr = parseFloat(document.getElementById('inputPR').value) || 3;
+            const ak = parseFloat(document.getElementById('inputAK').value) || 3;
+            const ik = parseFloat(document.getElementById('inputIK').value) || 3;
+            const mo = parseFloat(document.getElementById('inputMO').value) || 3;
+            DB.coso = [
+                { name: 'Lingkungan pengendalian', skor: Math.min(5, Math.max(1, lp)) },
+                { name: 'Penilaian risiko', skor: Math.min(5, Math.max(1, pr)) },
+                { name: 'Aktivitas pengendalian', skor: Math.min(5, Math.max(1, ak)) },
+                { name: 'Informasi & komunikasi', skor: Math.min(5, Math.max(1, ik)) },
+                { name: 'Monitoring', skor: Math.min(5, Math.max(1, mo)) }
+            ];
+            DB.status = document.getElementById('inputStatus').value || 'Cukup memadai';
+
+            const nama = document.getElementById('inputRisikoNama').value.split(',').map(s => s.trim()).filter(Boolean);
+            const prob = document.getElementById('inputRisikoProb').value.split(',').map(s => s.trim()).filter(Boolean);
+            const dampak = document.getElementById('inputRisikoDampak').value.split(',').map(s => s.trim()).filter(Boolean);
+            const mit = document.getElementById('inputRisikoMit').value.split(',').map(s => s.trim()).filter(Boolean);
+            const maxLen = Math.max(nama.length, prob.length, dampak.length, mit.length);
+            DB.risiko = [];
+            for (let i = 0; i < Math.min(maxLen, 4); i++) {
+                DB.risiko.push({
+                    name: nama[i] || `Risiko ${i+1}`,
+                    prob: prob[i] || 'Sedang',
+                    dampak: dampak[i] || 'Sedang',
+                    mit: mit[i] || 'Perbaiki sistem'
+                });
+            }
+
+            const rekom = document.getElementById('inputQuickWins').value.split(',').map(s => s.trim()).filter(Boolean);
+            const find = document.getElementById('inputQuickFind').value.split(',').map(s => s.trim()).filter(Boolean);
+            const waktu = document.getElementById('inputQuickWaktu').value.split(',').map(s => s.trim()).filter(Boolean);
+            const priorities = ['Quick Win', 'Quick Win', 'Medium', 'Long term'];
+            const colors = ['#378ADD', '#378ADD', '#EF9F27', '#7F77DD'];
+            const bcs = ['b-blue', 'b-blue', 'b-amber', 'b-purple'];
+            const maxLen2 = Math.max(rekom.length, find.length, waktu.length);
+            DB.quickWins = [];
+            for (let i = 0; i < Math.min(maxLen2, 4); i++) {
+                DB.quickWins.push({
+                    rekom: rekom[i] || `Rekomendasi ${i+1}`,
+                    find: find[i] || 'Temuan',
+                    waktu: waktu[i] || '0–3 bulan',
+                    pri: priorities[i] || 'Quick Win',
+                    bc: bcs[i] || 'b-blue',
+                    lc: colors[i] || '#378ADD'
+                });
+            }
+
+            closeModal();
+            renderAll();
+            showToast('✅ Data berhasil diperbarui!');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // ============================================================
+        //  NAVIGATION
+        // ============================================================
+        document.querySelectorAll('.npill').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tab = this.dataset.tab;
+                document.querySelectorAll('.npill').forEach(b => { b.classList.remove('on') });
+                this.classList.add('on');
+                document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+                document.getElementById('pane-' + tab).classList.add('on');
+            });
+        });
+
+        // ============================================================
+        //  INIT
+        // ============================================================
+        renderAll();
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+
+</body>
+</html>
